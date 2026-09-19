@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function validSession(token) {
+      return exists(/databases/$(database)/documents/questionnaireSessions/$(token))
+        && get(/databases/$(database)/documents/questionnaireSessions/$(token)).data.active == true;
+    }
+    match /users/{userId} { allow read, write: if signedIn() && request.auth.uid == userId; }
+    match /products/{id} { allow read, write: if signedIn(); }
+    match /questionnaireSessions/{id} {
+      allow create, update, delete: if signedIn();
+      allow get: if signedIn() || resource.data.active == true;
+      allow list: if signedIn();
+    }
+    match /sellers/{id} {
+      allow read, update, delete: if signedIn();
+      allow create: if signedIn() || (request.resource.data.questionnaireToken is string && validSession(request.resource.data.questionnaireToken));
+    }
+    match /researchResponses/{id} {
+      allow read, update, delete: if signedIn();
+      allow create: if signedIn() || (request.resource.data.questionnaireToken is string && validSession(request.resource.data.questionnaireToken));
+    }
+  }
+}

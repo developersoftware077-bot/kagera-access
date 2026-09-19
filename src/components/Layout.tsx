@@ -1,0 +1,6 @@
+import { BarChart3, ClipboardList, LayoutDashboard, LogOut, Menu, Package, Settings, Store } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { supabase } from '../supabase/config'
+import { useState } from 'react'
+const nav = [{to:'/dashboard', label:'Dashboard', icon:LayoutDashboard},{to:'/sellers',label:'Sellers',icon:Store},{to:'/products',label:'Products',icon:Package},{to:'/research',label:'Research',icon:ClipboardList},{to:'/analysis',label:'Analysis',icon:BarChart3}]
+export default function Layout({children}:{children:React.ReactNode}) { const [open,setOpen]=useState(false); const navigate=useNavigate(); const logout=async()=>{await supabase?.auth.signOut();navigate('/login')}; return <div className="shell"><aside className={open?'open':''}><div className="brand">KAGERA <b>ACCESS</b><small>Market Research</small></div><nav>{nav.map(({to,label,icon:Icon})=><NavLink key={to} to={to} onClick={()=>setOpen(false)}><Icon size={19}/>{label}</NavLink>)}</nav><div className="side-bottom"><a><Settings size={18}/>Settings</a><button onClick={logout}><LogOut size={18}/>Sign out</button></div></aside><main><header><button className="menu" onClick={()=>setOpen(!open)} aria-label="Open menu"><Menu/></button><span>Research workspace</span></header>{children}</main></div> }
